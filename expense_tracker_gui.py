@@ -9,6 +9,8 @@ class ExpenseTrackerGUI:
     """
 
     def __init__(self, controller, profile=None):
+        """ Initalizer method. Starts the main GUI window. 
+        """
 
         # Cache a reference to the controller and give it a reference
         # to this object since the value never returns due to the
@@ -25,11 +27,14 @@ class ExpenseTrackerGUI:
         # Setup File Menu options.
         self.menubar = tk.Menu(self.root)
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
-        self.filemenu.add_command(label="New Profile", command=controller.new_profile)
+        self.filemenu.add_command(label="New Profile", 
+                                  command=controller.new_profile)
         self.filemenu.add_command(label="Open Profile", command=controller.load)
         self.filemenu.add_command(label="Save", command=controller.save)
-        self.filemenu.add_command(label="Save As", command=controller.save_as_new_profile)
-        self.filemenu.add_command(label="Save and Exit", command=controller.save_and_exit)
+        self.filemenu.add_command(label="Save As", 
+                                  command=controller.save_as_new_profile)
+        self.filemenu.add_command(label="Save and Exit", 
+                                  command=controller.save_and_exit)
 
         self.menubar.add_cascade(menu=self.filemenu, label="File")
         self.root.config(menu=self.menubar)
@@ -44,15 +49,18 @@ class ExpenseTrackerGUI:
         self.layout.pack(fill='x', padx=0, pady=0, anchor='n')
 
         # Profile name.
-        self.profile_title = tk.Label(self.layout, text="Profile:", font=('Arial', 12))
+        self.profile_title = tk.Label(self.layout, text="Profile:", 
+                                      font=('Arial', 12))
         self.profile_title.pack(side='left', padx=10, pady=10)
 
         # Add Account button
-        self.add_account_button = tk.Button(self.layout, text="Add Account", font=('Arial', 14))
+        self.add_account_button = tk.Button(self.layout, text="Add Account", 
+                                            font=('Arial', 14))
         self.add_account_button.pack(side='right', padx=10, pady=10)
 
         # Account selector dropdown. 
-        self.account_selector = ttk.Combobox(self.layout, state="readonly", font=('Arial', 14))
+        self.account_selector = ttk.Combobox(self.layout, state="readonly", 
+                                             font=('Arial', 14))
         self.root.option_add("*TCombobox*Listbox*Font", ('Arial', 14)) 
         self.account_selector.pack(side='top', padx=10, pady=10)
 
@@ -61,7 +69,9 @@ class ExpenseTrackerGUI:
         self.trans_region.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
         # Save and Exit button.
-        self.exit_button = tk.Button(self.root, text="Save and Exit", font=('Arial', 14), command=self.controller.save_and_exit)
+        self.exit_button = tk.Button(self.root, text="Save and Exit", 
+                                     font=('Arial', 14), 
+                                     command=self.controller.save_and_exit)
         self.exit_button.pack(side='right', anchor='s', padx=15, pady=15)
 
         if profile != None:
@@ -74,20 +84,22 @@ class ExpenseTrackerGUI:
 
     def setup_profile_in_gui(self, profile):
         """ Updates the values of display objects in the main GUI 
-        window to match the information in the active profile. 
+        window to match the information in the given profile. 
         """
 
         # Configure profile name.
         self.profile_title.config(text=f"Profile: {profile.name}")
 
         # Configure add account button command.
-        self.add_account_button.config(command=lambda: self.add_account(profile))
+        self.add_account_button.config(command=lambda: 
+                                       self.add_account(profile))
 
         # Configure account selector dropdown options and update 
         # command.
         self.account_selector.config(values=profile.get_account_names())
         self.account_selector.set("")
-        self.account_selector.bind("<<ComboboxSelected>>", lambda event: self.update_trans_window(event, profile))
+        self.account_selector.bind("<<ComboboxSelected>>", lambda event: 
+                                   self.update_trans_window(event, profile))
 
         # Clear the transaction window.
         self.clear_trans_window()
@@ -117,15 +129,24 @@ class ExpenseTrackerGUI:
         self.account_frame.pack(fill='x')
 
         # Setup a new account label
-        self.account_label = tk.Label(self.account_frame, text=f"Account: {account.name}", font=('Arial', 12))
+        self.account_label = tk.Label(self.account_frame, 
+                                      text=f"Account: {account.name}", 
+                                      font=('Arial', 12))
         self.account_label.pack(side='left', padx=30, pady=10, anchor='w')
 
         # Set an edit account button
-        self.edit_account_button = tk.Button(self.account_frame, text="Edit Account", font=('Arial', 12), command=lambda: self.edit_account(account))
-        self.edit_account_button.pack(side='right', padx=50, pady=10, anchor='e')
+        self.edit_account_button = tk.Button(self.account_frame, 
+                                             text="Edit Account", 
+                                             font=('Arial', 12), 
+                                             command=lambda: 
+                                                self.edit_account(account))
+        self.edit_account_button.pack(side='right', padx=50, 
+                                      pady=10, anchor='e')
 
         # Setup the account balance label
-        self.account_balance = tk.Label(self.account_frame, text=f"${account.balance:.2f}", font=('Arial', 12))
+        self.account_balance = tk.Label(self.account_frame, 
+                                        text=f"${account.balance:.2f}", 
+                                        font=('Arial', 12))
         self.account_balance.pack(side='right', padx=40, pady=10, anchor='e')
 
         # Setup display objects for each transaction in the list.
@@ -133,14 +154,18 @@ class ExpenseTrackerGUI:
             TransactionDisplay(self.trans_region.interior, transaction, self)
 
         # Add Transaction button.
-        self.add_trans_button = tk.Button(self.trans_region.interior, text="Add Transaction", font=('Arial', 12), command=lambda: self.add_trans(account))
+        self.add_trans_button = tk.Button(self.trans_region.interior, 
+                                          text="Add Transaction", 
+                                          font=('Arial', 12), 
+                                          command=lambda: 
+                                            self.add_trans(account))
         self.add_trans_button.pack(side='bottom', anchor='w', padx=15, pady=15)
 
     def clear_trans_window(self):
         """ Clears all objects currently in the transaction display
         region. 
         """
-        # Destroy all previous children of the frame object. 
+        # Destroy all children of the frame object. 
         for child in self.trans_region.interior.winfo_children():
             child.destroy()
 
@@ -165,8 +190,7 @@ class ExpenseTrackerGUI:
 
     def edit_account(self, account):
         """ Method bound to the Edit Account button, opens the Add 
-        Account GUI window with prepopulated values and changes the 
-        save method to edit the existing account. 
+        Account GUI window with prepopulated values. 
         """
 
         edit_window = AddAccountGUI(self, None)
@@ -199,10 +223,10 @@ class ExpenseTrackerGUI:
 
         self.account_selector.config(values=profile.get_account_names())
 
-        # Clears the selection to prevent errors in case of deletion.
+        # Clears the account dropdown selection and the transaction
+        # display window.
         self.account_selector.set('')
-        for child in self.trans_region.interior.winfo_children():
-            child.destroy()
+        self.clear_trans_window()
 
 class InputGUIParent:
     """ A parent class for the Add__GUI classes that contains a few
@@ -270,11 +294,13 @@ class AddAccountGUI(InputGUIParent):
     """
 
     def __init__(self, parent, profile):
+        """ Initailizer method. Initializes the new GUI window. 
+        """
 
         # Initialize new GUI window.
         self.root = tk.Toplevel(parent.root)
         self.root.wm_transient(parent.root)
-        self.root.grab_set()
+        self.root.grab_set()    # Binds all input to this window.
         self.root.geometry('600x300')
         self.root.title("Account Details")
 
@@ -283,23 +309,33 @@ class AddAccountGUI(InputGUIParent):
         valid_money = self.root.register(self.validate_entry_money_value)
 
         # Account name input.
-        self.name_label = tk.Label(self.root, text="Account name:", font=('Arial', 12))
+        self.name_label = tk.Label(self.root, text="Account name:", 
+                                   font=('Arial', 12))
         self.name_label.pack(padx=20, pady=20)
-        self.name_input = tk.Entry(self.root, font=('Arial', 12), validate='key', validatecommand=(valid_name, '%P'))
+        self.name_input = tk.Entry(self.root, font=('Arial', 12), 
+                                   validate='key', 
+                                   validatecommand=(valid_name, '%P'))
         self.name_input.pack(padx=20, pady=10)
 
         # Account balance input.
-        self.balance_label = tk.Label(self.root, text="Account balance:", font=('Arial', 12))
+        self.balance_label = tk.Label(self.root, text="Account balance:", 
+                                      font=('Arial', 12))
         self.balance_label.pack(padx=20, pady=20)
-        self.balance_input = tk.Entry(self.root, font=('Arial', 12), validate='key', validatecommand=(valid_money, '%P'))
+        self.balance_input = tk.Entry(self.root, font=('Arial', 12), 
+                                      validate='key', 
+                                      validatecommand=(valid_money, '%P'))
         self.balance_input.pack(padx=20, pady=10)
 
         # Cancel button. 
-        self.cancel_button = tk.Button(self.root, text="Cancel", font=('Arial', 10), command=self.close_add_account_window)
+        self.cancel_button = tk.Button(self.root, text="Cancel", 
+                                       font=('Arial', 10), 
+                                       command=self.close_add_account_window)
         self.cancel_button.pack(side='left', padx=10, pady=10, anchor='s')
 
         # Save button.
-        self.save_button = tk.Button(self.root, text="Save", font=('Arial', 10), command=lambda: self.save_account_new(profile, parent))
+        self.save_button = tk.Button(self.root, text="Save", font=('Arial', 10),
+                                     command=lambda: 
+                                        self.save_account_new(profile, parent))
         self.save_button.pack(side='right', padx=10, pady=10, anchor='s')
 
     def close_add_account_window(self):
@@ -334,6 +370,7 @@ class AddAccountGUI(InputGUIParent):
         parent.set_trans_window(account)
         parent.update_account_info(account)
 
+        # Close the window.
         self.close_add_account_window()
 
     def setup_as_edit(self, account, parent):
@@ -347,11 +384,16 @@ class AddAccountGUI(InputGUIParent):
         self.balance_input.insert(0, f"{account.balance:.2f}")
 
         # Add a delete button
-        self.delete_button = tk.Button(self.root, text="Delete", font=('Arial', 10), command=lambda: self.delete_account(account, parent.update_account_info_from_deletion))
+        del_command = lambda: self.delete_account(account, 
+                                    parent.update_account_info_from_deletion)
+        self.delete_button = tk.Button(self.root, text="Delete", 
+                                       font=('Arial', 10), command=del_command)
         self.delete_button.place(relx=0.5, rely=1.0, y=-10, anchor='s')
 
         # Edit save command.
-        self.save_button.config(command=lambda: self.save_account_edit(account, parent.update_account_info))
+        save_command = lambda: self.save_account_edit(account, 
+                                                    parent.update_account_info)
+        self.save_button.config(command=save_command)
 
     def save_account_edit(self, account, option_update_func):
         """ Saves the data currently entered in the Add Account GUI as
@@ -362,8 +404,10 @@ class AddAccountGUI(InputGUIParent):
         if self.name_input.get() == "" or self.balance_input.get() == "":
             return
 
-        # Verify that the name doesn't already exist in another account.
-        if self.name_input.get() != account.name and self.name_input.get() in account.profile.get_account_names():
+        # Verify that the name doesn't already exist in another account
+        # unless it's this account.
+        if (self.name_input.get() != account.name) and \
+                (self.name_input.get() in account.profile.get_account_names()):
             return
 
         # Get the values and assign them to the account.
@@ -374,6 +418,7 @@ class AddAccountGUI(InputGUIParent):
         # account labels.
         option_update_func(account)
 
+        # Close this window.
         self.close_add_account_window()
 
     def delete_account(self, account, option_update_func):
@@ -400,11 +445,13 @@ class AddTransactionGUI(InputGUIParent):
     """
     
     def __init__(self, parent, account, update_func):
+        """ Initalizer method, sets up the GUI window. 
+        """
 
         # Initialize new GUI window.
         self.root = tk.Toplevel(parent)
         self.root.wm_transient(parent)
-        self.root.grab_set()
+        self.root.grab_set()    # Binds all input to this window.
         self.root.geometry('600x480')
         self.root.title("Transaction Details")
 
@@ -415,23 +462,32 @@ class AddTransactionGUI(InputGUIParent):
         # Transaction description input.
         self.desc_frame = tk.Frame(self.root)
         self.desc_frame.pack(padx=10, pady=30, fill='x')
-        self.desc_label = tk.Label(self.desc_frame, text="Transaction description:", font=('Arial', 12))
+        self.desc_label = tk.Label(self.desc_frame, 
+                                   text="Transaction description:", 
+                                   font=('Arial', 12))
         self.desc_label.pack(padx=0, pady=5)
-        self.desc_input = tk.Entry(self.desc_frame, width=50, font=('Arial', 12), validate='key', validatecommand=(valid_name, '%P'))
+        self.desc_input = tk.Entry(self.desc_frame, width=50, 
+                                   font=('Arial', 12), validate='key', 
+                                   validatecommand=(valid_name, '%P'))
         self.desc_input.pack(padx=0, pady=5)
 
         # Transaction amount input.
         self.amount_frame = tk.Frame(self.root)
         self.amount_frame.pack(padx=10, pady=0, fill='x')
-        self.amount_label = tk.Label(self.amount_frame, text="Transaction amount:", font=('Arial', 12))
+        self.amount_label = tk.Label(self.amount_frame, 
+                                     text="Transaction amount:", 
+                                     font=('Arial', 12))
         self.amount_label.pack(padx=0, pady=5)
-        self.amount_input = tk.Entry(self.amount_frame, font=('Arial', 12), validate='key', validatecommand=(valid_money, '%P'))
+        self.amount_input = tk.Entry(self.amount_frame, font=('Arial', 12), 
+                                     validate='key', 
+                                     validatecommand=(valid_money, '%P'))
         self.amount_input.pack(padx=0, pady=5)
 
         # Transaction date input.
         self.date_frame = tk.Frame(self.root)
         self.date_frame.pack(padx=10, pady=30, fill='x')
-        self.date_label = tk.Label(self.date_frame, text="Transaction date:", font=('Arial', 12))
+        self.date_label = tk.Label(self.date_frame, text="Transaction date:", 
+                                   font=('Arial', 12))
         self.date_label.pack(padx=0, pady=5)
         self.date_entry = DateInput(self.date_frame)
         self.date_entry.pack(padx=0, pady=5)
@@ -439,19 +495,26 @@ class AddTransactionGUI(InputGUIParent):
         # Transaction type input.
         self.type_frame = tk.Frame(self.root)
         self.type_frame.pack(padx=10, pady=0, fill='x')
-        self.type_label = tk.Label(self.type_frame, text="Transaction type:", font=('Arial', 12))
+        self.type_label = tk.Label(self.type_frame, text="Transaction type:", 
+                                   font=('Arial', 12))
         self.type_label.pack(padx=0, pady=5)
-        self.type_selector = ttk.Combobox(self.type_frame, values=["Expense", "Income"], state="readonly", font=('Arial', 12))
+        self.type_selector = ttk.Combobox(self.type_frame, 
+                                          values=["Expense", "Income"], 
+                                          state="readonly", font=('Arial', 12))
         self.root.option_add("*TCombobox*Listbox*Font", ('Arial', 12)) 
         self.type_selector.pack(padx=0, pady=0)
         self.type_selector.set("Expense")
 
         # Cancel button. 
-        self.cancel_button = tk.Button(self.root, text="Cancel", font=('Arial', 10), command=self.close_trans_window)
+        self.cancel_button = tk.Button(self.root, text="Cancel", 
+                                       font=('Arial', 10), 
+                                       command=self.close_trans_window)
         self.cancel_button.pack(side='left', padx=10, pady=10, anchor='s')
 
         # Save button.
-        self.save_button = tk.Button(self.root, text="Save", font=('Arial', 10), command=lambda: self.save_trans_new(account, update_func))
+        self.save_button = tk.Button(self.root, text="Save", font=('Arial', 10), 
+                                     command=lambda: 
+                                     self.save_trans_new(account, update_func))
         self.save_button.pack(side='right', padx=10, pady=10, anchor='s')
     
     def save_trans_new(self, account, update_func):
@@ -489,9 +552,7 @@ class AddTransactionGUI(InputGUIParent):
     
     def setup_as_edit(self, trans, update_func, delete_func):
         """ Sets up the add transaction window to act as an edit window
-        for an exisiting transaction. Prepopulates the fields with the
-        current values, adds a delete button, and changes the command
-        bound to the save button. 
+        for an exisiting transaction.
         """
 
         # Prepopulate current values in the fields.
@@ -504,11 +565,15 @@ class AddTransactionGUI(InputGUIParent):
         self.type_selector.config(state='disabled', background='pink')
 
         # Add a delete button
-        self.delete_button = tk.Button(self.root, text="Delete", font=('Arial', 10), command=lambda: self.delete_trans(trans, delete_func))
+        self.delete_button = tk.Button(self.root, text="Delete", 
+                                       font=('Arial', 10), 
+                                       command=lambda: 
+                                         self.delete_trans(trans, delete_func))
         self.delete_button.place(relx=0.5, rely=1.0, y=-10, anchor='s')
 
         # Update the save button command. 
-        self.save_button.config(command=lambda: self.save_trans_edit(trans, update_func))
+        self.save_button.config(command=lambda: 
+                                    self.save_trans_edit(trans, update_func))
 
     def save_trans_edit(self, trans, update_func):
         """ Saves the changes made to the transaction in the edit trans
@@ -557,6 +622,8 @@ class TransactionDisplay:
     """
 
     def __init__(self, parent, trans, main_gui):
+        """ Initializer method, sets up the transaction display.
+        """
 
         # Store a reference to the main GUI window
         self.main_gui = main_gui
@@ -566,19 +633,24 @@ class TransactionDisplay:
         self.wrapper.pack(padx=5, pady=2, fill='x')
 
         # Date label
-        self.date_label = tk.Label(self.wrapper, text=f"{trans.date:%d %b %Y}", font=('Arial', 12))
+        self.date_label = tk.Label(self.wrapper, text=f"{trans.date:%d %b %Y}", 
+                                   font=('Arial', 12))
         self.date_label.pack(side='left', padx=5, pady=5)
 
         # Description label
-        self.desc_label = tk.Label(self.wrapper, text=f"{trans.description}", font=('Arial', 10))
+        self.desc_label = tk.Label(self.wrapper, text=f"{trans.description}", 
+                                   font=('Arial', 10))
         self.desc_label.pack(side='left', padx=5, pady=5, fill='x')
 
         # Edit button
-        self.edit_button = tk.Button(self.wrapper, text="Edit", font=('Arial', 10), command=lambda: self.edit_trans(trans))
+        self.edit_button = tk.Button(self.wrapper, text="Edit", 
+                                     font=('Arial', 10), 
+                                     command=lambda: self.edit_trans(trans))
         self.edit_button.pack(side='right', padx=5, pady=5, anchor='ne')
 
         # Amount label
-        self.amount_label = tk.Label(self.wrapper, text=f"${trans.amount:.2f}", font=('Arial', 12))
+        self.amount_label = tk.Label(self.wrapper, text=f"${trans.amount:.2f}", 
+                                     font=('Arial', 12))
         self.amount_label.pack(side='right', padx=5, pady=5)
 
         # Expense vs Income differences
@@ -592,20 +664,26 @@ class TransactionDisplay:
         transaction details. 
         """
 
+        # Update the transaction display values. 
         self.date_label.config(text=f"{trans.date:%d %b %Y}")
         self.desc_label.config(text=f"{trans.description}")
         self.amount_label.config(text=f"${trans.amount:.2f}")
 
-        self.main_gui.account_balance.config(text=f"{trans.account.balance:.2f}")
+        # Update the account balance display.
+        self.main_gui.account_balance.config(
+                                        text=f"{trans.account.balance:.2f}")
 
     def delete(self, trans):
         """ Destroys the self.wrapper object to remove the GUI frame
         from the window. 
         """
 
+        # Destroy the display object.
         self.wrapper.destroy()
 
-        self.main_gui.account_balance.config(text=f"{trans.account.balance:.2f}")
+        # Update the account balance display to reflect the change.
+        self.main_gui.account_balance.config(
+                                        text=f"{trans.account.balance:.2f}")
 
     def edit_trans(self, trans):
         """ Method to open the add transaction window for editing the
@@ -613,13 +691,14 @@ class TransactionDisplay:
         """
 
         window = AddTransactionGUI(self.wrapper.winfo_toplevel(), None, None)
-        window.setup_as_edit(trans, self.update_values, lambda: self.delete(trans))
+        window.setup_as_edit(trans, self.update_values, 
+                                lambda: self.delete(trans))
 
 class DateInput(ttk.Frame):
     """ A custom class written to allow the user to enter a date. Uses
     an Entry field to allow the user to enter the date, and buttons on
     either side to allow incrementing the date one day in either 
-    direction.      %d %b %Y
+    direction.
     """
 
     # Constant used for validating date input. 
@@ -637,14 +716,21 @@ class DateInput(ttk.Frame):
     ]
 
     def __init__(self, parent, default_date=date.today(), *args, **kw):
+        """ Initializer method. Sets up the entry object and its 
+        buttons.
+        """
 
         # Call the parent frame init method. 
         ttk.Frame.__init__(self, parent, *args, **kw)
 
         # Setup the increment and decrement buttons.
-        self.decrement_button = tk.Button(self, text="<", command=lambda: self.increment_date(-1))
+        self.decrement_button = tk.Button(self, text="<", 
+                                          command=lambda: 
+                                             self.increment_date(-1))
         self.decrement_button.pack(side='left', anchor='w')
-        self.increment_button = tk.Button(self, text=">", command=lambda: self.increment_date(1))
+        self.increment_button = tk.Button(self, text=">", 
+                                          command=lambda: 
+                                             self.increment_date(1))
         self.increment_button.pack(side='right', anchor='e')
         
         # Store the default background color and date.
@@ -652,8 +738,13 @@ class DateInput(ttk.Frame):
         self.default_date = f"{default_date:%m/%d/%Y}"
 
         # Setup the entry field
-        self.date_entry = tk.Entry(self, font=('Arial', 12), width=12, validate='all', validatecommand=(self.register(self.validate_entry_date), '%V', '%P'))
-        self.date_entry.pack(padx=2, pady=5, fill='x', side='top', anchor='center')
+        self.date_entry = tk.Entry(self, font=('Arial', 12), width=12, 
+                                   validate='all', 
+                                   validatecommand=(
+                                       self.register(self.validate_entry_date), 
+                                       '%V', '%P'))
+        self.date_entry.pack(padx=2, pady=5, fill='x', side='top', 
+                             anchor='center')
         self.date_entry.insert(0, self.default_date) 
 
     def get(self):
@@ -672,9 +763,14 @@ class DateInput(ttk.Frame):
         that date. 
         """
 
+        # Adjust the default date.
         self.default_date = f"{date:%m/%d/%Y}"
+
+        # Insert the new value.
         self.date_entry.delete(0, tk.END)
         self.date_entry.insert(0, self.default_date)
+
+        # Turn validation back on after calling delete().
         self.date_entry.config(validate='all')
 
     def increment_date(self, offset):
@@ -683,10 +779,10 @@ class DateInput(ttk.Frame):
         a valid date. 
         """
 
-        # Get current date value
+        # Get current date value.
         date_str = self.date_entry.get()
 
-        # Confirm it is a valid date before continuing
+        # Confirm it is a valid date before continuing.
         if DateInput.is_valid_date(date_str):
 
             # Turn the string into a datetime object and use timedelta
@@ -700,7 +796,7 @@ class DateInput(ttk.Frame):
             self.date_entry.delete(0, tk.END)
             self.date_entry.insert(0, f"{date_obj:%m/%d/%Y}")
 
-            # Turn back on entry validation after calling delete()
+            # Turn back on entry validation after calling delete().
             self.date_entry.config(validate='all')
 
 
@@ -718,7 +814,8 @@ class DateInput(ttk.Frame):
             if len(input) > 10:
                 is_valid = False
             else:
-                # Verify that all characters match valid options for the index.
+                # Verify that all characters match valid options for 
+                # the index.
                 for index, char in enumerate(input):
                     if char not in self.VALID_DATE_CHARS[index]:
                         is_valid = False
@@ -726,7 +823,6 @@ class DateInput(ttk.Frame):
         # Checks to run only if reason is focusout.
         if reason == 'focusout':  
 
-            # if the input isn't valid, then turn the background pink 
             # if the input isn't valid, then turn the background pink
             # and reset the date to the default.
             if not DateInput.is_valid_date(input):

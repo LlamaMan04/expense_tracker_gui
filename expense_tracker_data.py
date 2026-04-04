@@ -52,7 +52,7 @@ class Profile:
         account.profile = self
 
     def remove_account(self, account):
-        """ Removes the passed account from self.accounts.
+        """ Removes the given account from self.accounts.
         """
 
         self.accounts.remove(account)
@@ -67,6 +67,9 @@ class Account:
 
         self.name = name
         self.balance = balance
+
+        # If we have been given a transactions list, assign it. 
+        # Otherwise, create it as an empty list. 
         if transactions != None:
             self.transactions = transactions
             # Make sure the account pointer in each transaction points
@@ -127,6 +130,9 @@ class Transaction:
     """
 
     def __init__(self, amount, description, date, type):
+        """ Initializer method. Assigns the given values.
+        """
+
         self.amount = amount
         self.description = description
         self.date = date

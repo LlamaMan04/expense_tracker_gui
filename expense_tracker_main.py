@@ -3,6 +3,21 @@ from expense_tracker_gui import ExpenseTrackerGUI
 from tkinter import messagebox, simpledialog, filedialog
 import pickle, shelve
 
+"""
+Welcome to the Expense Tracker. This program uses a GUI window to allow
+a user to personally track their financial account information in one
+place to verify that the expected amounts match the actual amounts.
+
+This program is organized into four files - this file contains the 
+control portion and the save/load portions, expense_tracker_gui.py 
+contains all of the GUI control portions, expense_tracker_data.py 
+contains the classes used for data representation, and 
+test_expense_tracker.py contains all of the testing functions. 
+
+Note that due to a limitation in the VertialScrolledFrame class, 
+there may be some odd scroll behavior on Linux and Mac systems. 
+"""
+
 class Controller:
     """ Class to handle program control and store program data.
     """
@@ -33,7 +48,8 @@ class Controller:
                 self.active_file_path = None
                 self.active_profile = None
         else:
-            # Initialize the active profile to None.
+            # If there is no active filepath, initialize the active 
+            # profile to None.
             self.active_profile = None
 
         # Create an ExpenseTrackerGUI object to intialize the GUI. Note
@@ -50,23 +66,28 @@ class Controller:
         # If there is a profile currently active, ask if the user wants
         # to save it before continuing. 
         if self.active_profile != None:
-            if messagebox.askyesno("Save?", "Would you like to save the current profile before continuing?"):
+            if messagebox.askyesno("Save?", "Would you like to save the "\
+                                   "current profile before continuing?"):
                 self.save()
 
         # Prompt for a new profile name. 
-        user_input = simpledialog.askstring("Profile Name", "Enter a name for the new profile:", initialvalue="New Profile")
+        user_input = simpledialog.askstring("Profile Name", 
+                                            "Enter a name for the new profile:", 
+                                            initialvalue="New Profile")
 
         if user_input != None:
 
             # If the profile name is empty, just display a "creation 
             # failed" message
             if user_input == "":
-                messagebox.showerror("Invalid", "Invalid name, profile creation failed")
+                messagebox.showerror("Invalid", 
+                                     "Invalid name, profile creation failed")
             else:
                 # Create a new profile and update the GUI to match. 
                 self.active_profile = Profile(user_input)
                 self.main_gui.setup_profile_in_gui(self.active_profile)
-                messagebox.showinfo("Success", "New profile successfully created!")
+                messagebox.showinfo("Success", 
+                                    "New profile successfully created!")
 
                 # Also reset the active filepath.
                 self.active_file_path = None
@@ -79,7 +100,9 @@ class Controller:
         # If there is a profile currently active, ask if the user wants
         # to save it before continuing. 
         if self.active_profile != None:
-            if messagebox.askyesno("Save?", "Would you like to save the current profile before continuing?"):
+            if messagebox.askyesno("Save?", 
+                                   "Would you like to save the current "\
+                                    "profile before continuing?"):
                 self.save()
 
         # Prompt the user for a filepath.

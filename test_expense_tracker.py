@@ -79,6 +79,7 @@ def test_is_valid_date():
     assert DateInput.is_valid_date("01/32/2004") == False
     assert DateInput.is_valid_date("13/30/2004") == False
     assert DateInput.is_valid_date("02/29/2003") == False
+    assert DateInput.is_valid_date("02/29/2004") == True
     assert DateInput.is_valid_date("01/01/2004") == True
     assert DateInput.is_valid_date("06/24/1995") == True
 
@@ -134,7 +135,7 @@ def test_get_account_from_name():
     assert test_profile.get_account_from_name("Test Account 1") == \
                                             test_account_1
 
-    # Add an account, confirm the method can find it as well.  
+    # Add another account, confirm the method can find it as well.  
     test_account_2 = Account("Test Account 2", balance=400)
     test_profile.add_account(test_account_2)
     assert test_profile.get_account_from_name("Test Account 2") == \
@@ -299,7 +300,7 @@ def test_update_amount():
     the parent account's balance. 
     """
 
-    # Initialize an object to test on. 
+    # Initialize objects to test on. 
     trans_1 = Transaction(200, "Test 1", date.today(), TransType.EXPENSE)
     trans_2 = Transaction(100, "Test 2", date.today(), TransType.INCOME)
     account = Account("Test Account", 400, [trans_1, trans_2])
@@ -332,7 +333,7 @@ def test_load_from():
     assert load_profile.name == profile_1.name
     assert load_profile.accounts == profile_1.accounts
 
-    # Save a Profile object to a test file.
+    # Save another Profile object to the test file.
     profile_2 = Profile("Test Profile", [
         Account("Test Account 1", 100),
         Account("Test Account 2", 300)
@@ -372,7 +373,7 @@ def test_save_to():
     assert load_prof.accounts == profile_1.accounts
     assert controller.active_file_path == "TestFile.etpk"
 
-    # Save a Profile object to a test file.
+    # Save a Profile object with accounts to a test file.
     profile_2 = Profile("Test Profile", [
         Account("Test Account 1", 100),
         Account("Test Account 2", 300)
