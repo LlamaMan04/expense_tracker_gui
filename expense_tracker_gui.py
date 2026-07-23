@@ -64,9 +64,9 @@ class ExpenseTrackerGUI:
         self.root.option_add("*TCombobox*Listbox*Font", ('Arial', 14)) 
         self.account_selector.pack(side='top', padx=10, pady=10)
 
-        # Transaction display region.
-        self.trans_region = VerticalScrolledFrame(self.root)
-        self.trans_region.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        # Account display region
+        self.account_frame = tk.Frame(self.root)
+        self.account_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
         # Save and Exit button.
         self.exit_button = tk.Button(self.root, text="Save and Exit", 
@@ -99,15 +99,15 @@ class ExpenseTrackerGUI:
         self.account_selector.config(values=profile.get_account_names())
         self.account_selector.set("")
         self.account_selector.bind("<<ComboboxSelected>>", lambda event: 
-                                   self.update_trans_window(event, profile))
+                                   self.update_account_window(event, profile))
 
-        # Clear the transaction window.
-        self.clear_trans_window()
+        # Clear the account window.
+        self.clear_account_window()
 
-    def update_trans_window(self, event, profile):
+    def update_account_window(self, event, profile):
         """ Event function bound to the account dropdown menu that calls
-        the method to update the list of transactions when the value 
-        of the dropdown changes. 
+        the method to update the account infor and list of transactions 
+        when the value of the dropdown changes. 
         """
 
         # Gets the selected account name from the combobox, associates
@@ -115,27 +115,26 @@ class ExpenseTrackerGUI:
         # function. 
         account_name = event.widget.get()
         account = profile.get_account_from_name(account_name)
-        self.set_trans_window(account)
+        self.set_account_window(account)
 
-    def set_trans_window(self, account):
-        """ Setup function that initializes a display for each 
-        transaction in an account's list. 
+    def set_account_window(self, account):
+        """ Setup function that initializes a display for account 
+        information and each transaction in that account's list. 
         """
         
-        self.clear_trans_window()
-
-        # Frame for layout
-        self.account_frame = tk.Frame(self.trans_region.interior)
-        self.account_frame.pack(fill='x')
+        self.clear_account_window()
+        
+        self.account_info_frame = tk.Frame(self.account_frame)
+        self.account_info_frame.pack(fill='x')
 
         # Setup a new account label
-        self.account_label = tk.Label(self.account_frame, 
+        self.account_label = tk.Label(self.account_info_frame, 
                                       text=f"Account: {account.name}", 
                                       font=('Arial', 12))
         self.account_label.pack(side='left', padx=30, pady=10, anchor='w')
 
         # Set an edit account button
-        self.edit_account_button = tk.Button(self.account_frame, 
+        self.edit_account_button = tk.Button(self.account_info_frame, 
                                              text="Edit Account", 
                                              font=('Arial', 12), 
                                              command=lambda: 
@@ -144,29 +143,53 @@ class ExpenseTrackerGUI:
                                       pady=10, anchor='e')
 
         # Setup the account balance label
-        self.account_balance = tk.Label(self.account_frame, 
+        self.account_balance = tk.Label(self.account_info_frame, 
                                         text=f"${account.balance:.2f}", 
                                         font=('Arial', 12))
         self.account_balance.pack(side='right', padx=40, pady=10, anchor='e')
+
+        # Add Transaction button.
+        self.add_trans_button = tk.Button(self.account_frame, 
+                                          text="Add Transaction", 
+                                          font=('Arial', 12), 
+                                          command=lambda: 
+                                            self.add_trans(account))
+        self.add_trans_button.pack(side='top', anchor='w', padx=30, pady=15)
+
+        self.set_trans_region(account)
+
+    def set_trans_region(self, account):
+        """ Setup function to render the display objects for each
+        transaction in the provided account
+        """
+
+        # Transaction display region.
+        self.trans_region = VerticalScrolledFrame(self.account_frame)
+        self.trans_region.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
         # Setup display objects for each transaction in the list.
         for transaction in account.transactions:
             TransactionDisplay(self.trans_region.interior, transaction, self)
 
-        # Add Transaction button.
-        self.add_trans_button = tk.Button(self.trans_region.interior, 
-                                          text="Add Transaction", 
-                                          font=('Arial', 12), 
-                                          command=lambda: 
-                                            self.add_trans(account))
-        self.add_trans_button.pack(side='bottom', anchor='w', padx=15, pady=15)
+    def update_trans_region(self, account):
+        """ Updates the transaction region to the current list of 
+        transactions in the provided account
+        """
 
-    def clear_trans_window(self):
+        # Destroy all children of the frame object. 
+        for child in self.trans_region.interior.winfo_children():
+            child.destroy()
+
+        # Render each transaction
+        for transaction in account.transactions:
+            TransactionDisplay(self.trans_region.interior, transaction, self)
+
+    def clear_account_window(self):
         """ Clears all objects currently in the transaction display
         region. 
         """
         # Destroy all children of the frame object. 
-        for child in self.trans_region.interior.winfo_children():
+        for child in self.account_frame.winfo_children():
             child.destroy()
 
     def render_new_trans(self, trans):
@@ -176,7 +199,7 @@ class ExpenseTrackerGUI:
         balance.
         """
 
-        TransactionDisplay(self.trans_region.interior, trans, self)
+        self.update_trans_region(trans.account)
         self.account_balance.config(text=f"${trans.account.balance:.2f}")
 
     def add_account(self, profile):
@@ -226,7 +249,7 @@ class ExpenseTrackerGUI:
         # Clears the account dropdown selection and the transaction
         # display window.
         self.account_selector.set('')
-        self.clear_trans_window()
+        self.clear_account_window()
 
 class InputGUIParent:
     """ A parent class for the Add__GUI classes that contains a few
@@ -742,7 +765,7 @@ class DateInput(ttk.Frame):
                                    validate='all', 
                                    validatecommand=(
                                        self.register(self.validate_entry_date), 
-                                       '%V', '%P'))
+                                       '%V', '%P', '%d'))
         self.date_entry.pack(padx=2, pady=5, fill='x', side='top', 
                              anchor='center')
         self.date_entry.insert(0, self.default_date) 
@@ -800,7 +823,7 @@ class DateInput(ttk.Frame):
             self.date_entry.config(validate='all')
 
 
-    def validate_entry_date(self, reason, input):
+    def validate_entry_date(self, reason, input, action):
         """ Validation method to be bound to the self.date_entry field
         to not allow invalid date inputs. 
         """
@@ -841,7 +864,19 @@ class DateInput(ttk.Frame):
             # Always reset the background color on keypress.
             self.date_entry.config(bg='white')
 
+        # If the input value is valid and the length is 2 or 5
+        # characters, register a function to run after this one that 
+        # adds a '/' character.
+        if is_valid and (len(input) == 2 or len(input) == 5) \
+                and action != '0':
+            self.date_entry.after_idle(self.add_slash)
+
         return is_valid 
+
+    def add_slash(self):
+        """ Adds a slash to the end of the date input value.
+        """
+        self.date_entry.insert(tk.END, '/')
 
     @staticmethod
     def is_valid_date(date):

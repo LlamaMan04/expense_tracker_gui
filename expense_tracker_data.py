@@ -98,6 +98,9 @@ class Account:
         # Update transaction account pointer.
         trans.account = self
 
+        # Sort transactions
+        self.sort_transactions()
+
     def trans_amount_change(self, old_amount, new_amount, type):
         """ Updates the account balance after a change to a transaction
         amount. 
@@ -109,6 +112,11 @@ class Account:
         else:
             self.balance -= old_amount
             self.balance += new_amount
+
+    def sort_transactions(self):
+        """ Sorts the transaction list by date
+        """
+        self.transactions.sort(reverse=True)
 
     def remove_trans(self, trans):
         """ Removes the given transaction from self.transaction and 
@@ -145,6 +153,15 @@ class Transaction:
 
         self.account.trans_amount_change(self.amount, new_amount, self.type)
         self.amount = new_amount
+
+    def __lt__ (self, other):
+        """ Implements the less than operator to use with the built-in
+        sort function.
+        """
+        if not isinstance(other, Transaction):
+            return NotImplemented
+        return self.date < other.date
+
 
 class TransType(Enum):
     """ Enum class used to store the type of a Transaction
