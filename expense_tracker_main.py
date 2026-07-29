@@ -127,7 +127,17 @@ class Controller:
         """
 
         with open(filepath, 'rb') as file:
-            return pickle.load(file)
+            data = pickle.load(file)
+
+        # Backwards compatibility portion - add in variables that didn't
+        # exist when the data was created. 
+        for account in data.accounts:
+            for trans in account.transactions:
+                if (trans.type == TransType.INCOME and 
+                    not hasattr(trans, 'tithing_paid')):
+                    trans.tithing_paid = False
+
+        return data
 
     def save_and_exit(self):
         """ If a profile is currently active, saves it and exit the 

@@ -210,7 +210,6 @@ class ExpenseTrackerGUI:
 
         AddAccountGUI(self, profile)
         
-
     def edit_account(self, account):
         """ Method bound to the Edit Account button, opens the Add 
         Account GUI window with prepopulated values. 
@@ -218,7 +217,6 @@ class ExpenseTrackerGUI:
 
         edit_window = AddAccountGUI(self, None)
         edit_window.setup_as_edit(account, self)
-
 
     def add_trans(self, account):
         """ Method to be bound to the Add Transaction button, 
@@ -676,7 +674,16 @@ class TransactionDisplay:
                                      font=('Arial', 12))
         self.amount_label.pack(side='right', padx=5, pady=5)
 
-        # Expense vs Income differences
+        # Add tithing checkbox for Income types
+        if trans.type == TransType.INCOME:
+            self.tithing_var = tk.BooleanVar(value=trans.tithing_paid)
+            self.tithing_check = tk.Checkbutton(self.wrapper, 
+                                    font=('Arial', 10), text="Tithing paid?", 
+                                    variable=self.tithing_var, 
+                                    command=lambda: self.tithing_update(trans))
+            self.tithing_check.pack(side='right', padx=5, pady=5)
+
+        # Expense vs Income different text color
         if trans.type == TransType.EXPENSE:
             self.amount_label.config(fg='red')
         else:
@@ -716,6 +723,14 @@ class TransactionDisplay:
         window = AddTransactionGUI(self.wrapper.winfo_toplevel(), None, None)
         window.setup_as_edit(trans, self.update_values, 
                                 lambda: self.delete(trans))
+
+    def tithing_update(self, trans):
+        """ Method bound to the tithing checkbox that runs on update, 
+        edits the tithing_paid field of the transaction to match the 
+        button state. 
+        """
+
+        trans.tithing_paid = self.tithing_var.get()
 
 class DateInput(ttk.Frame):
     """ A custom class written to allow the user to enter a date. Uses

@@ -137,14 +137,19 @@ class Transaction:
     account. 
     """
 
-    def __init__(self, amount, description, date, type):
-        """ Initializer method. Assigns the given values.
+    def __init__(self, amount, description, date, type, tithing_paid=False):
+        """ Initializer method. Assigns the given values. Tithing_paid 
+        is an optional value only provided for INCOME transaction types. 
+        Defaults to False if no value is provided. 
         """
 
         self.amount = amount
         self.description = description
         self.date = date
         self.type = type
+
+        if self.type == TransType.INCOME:
+            self.tithing_paid = tithing_paid
 
     def update_amount(self, new_amount):
         """ Updates the amount in the transaction and handles updating 
