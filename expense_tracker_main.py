@@ -30,12 +30,18 @@ class Controller:
         control function. 
         """
 
-        # Read current file path from persistent data shelf. 
+        # Read current file path and tithing display status from 
+        # persistent data shelf. 
         with shelve.open(self.APP_DATA_FILEPATH) as db:
             if "active_filepath" in db:
                 self.active_file_path = db["active_filepath"]
             else:
                 self.active_file_path = None
+
+            if "show_tithing" in db:
+                self.show_tithing = db["show_tithing"]
+            else:
+                self.show_tithing = True
 
         # If we have an active filepath, attempt to read the object 
         # there.
@@ -195,9 +201,11 @@ class Controller:
         """ Closes the program with no questions asked.   
         """
 
-        # Store current file path to persistent data shelf. 
+        # Store current file path and tithing visibility to persistent 
+        # data shelf. 
         with shelve.open(self.APP_DATA_FILEPATH) as db:
             db["active_filepath"] = self.active_file_path
+            db["show_tithing"] = self.show_tithing
 
         self.main_gui.root.destroy()
 

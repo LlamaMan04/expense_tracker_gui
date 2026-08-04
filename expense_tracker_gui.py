@@ -24,8 +24,10 @@ class ExpenseTrackerGUI:
         self.root.title("Expense Tracker")
         self.root.protocol('WM_DELETE_WINDOW', controller.exit_confirm)
 
-        # Setup File Menu options.
+        # Menubar setup
         self.menubar = tk.Menu(self.root)
+
+        # Setup File Menu options.
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
         self.filemenu.add_command(label="New Profile", 
                                   command=controller.new_profile)
@@ -37,8 +39,18 @@ class ExpenseTrackerGUI:
                                   command=controller.save_and_exit)
 
         self.menubar.add_cascade(menu=self.filemenu, label="File")
-        self.root.config(menu=self.menubar)
+        
+        # Setup Options Menu
+        self.option_menu = tk.Menu(self.menubar, tearoff=0)
+        self.tithing_visible = tk.BooleanVar(value=controller.show_tithing)
+        self.option_menu.add_checkbutton(label="Show Tithing?", 
+                                         variable=self.tithing_visible, 
+                                         command=self.update_tithing_visible)
 
+        self.menubar.add_cascade(menu=self.option_menu, label="Options")
+
+        self.root.config(menu=self.menubar)
+        
         # Setup title.
         self.heading = tk.Label(self.root, text="Expense Report", 
                                 font=("Arial", 20))
@@ -106,7 +118,7 @@ class ExpenseTrackerGUI:
 
     def update_account_window(self, event, profile):
         """ Event function bound to the account dropdown menu that calls
-        the method to update the account infor and list of transactions 
+        the method to update the account info and list of transactions 
         when the value of the dropdown changes. 
         """
 
@@ -167,22 +179,23 @@ class ExpenseTrackerGUI:
         self.trans_region = VerticalScrolledFrame(self.account_frame)
         self.trans_region.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
-        # Setup display objects for each transaction in the list.
-        for transaction in account.transactions:
-            TransactionDisplay(self.trans_region.interior, transaction, self)
+        self.update_trans_region(account)
 
     def update_trans_region(self, account):
         """ Updates the transaction region to the current list of 
         transactions in the provided account
         """
-
+        
         # Destroy all children of the frame object. 
         for child in self.trans_region.interior.winfo_children():
             child.destroy()
 
-        # Render each transaction
+        # Setup display objects for each transaction in the list.
+        self.transactions = []
         for transaction in account.transactions:
-            TransactionDisplay(self.trans_region.interior, transaction, self)
+            self.transactions.append(
+                TransactionDisplay(self.trans_region.interior, transaction, 
+                                    self, self.tithing_visible.get()))
 
     def clear_account_window(self):
         """ Clears all objects currently in the transaction display
@@ -232,6 +245,7 @@ class ExpenseTrackerGUI:
         """
 
         self.account_selector.config(values=account.profile.get_account_names())
+        self.account_selector.current(account.profile.accounts.index(account))
 
         # Update the account name label and account balance label.
         self.account_label.config(text=f"Account: {account.name}")
@@ -248,6 +262,20 @@ class ExpenseTrackerGUI:
         # display window.
         self.account_selector.set('')
         self.clear_account_window()
+
+    def update_tithing_visible(self):
+        """ Handles updating values and displays after the Show Tithing
+        option is changed. 
+        """
+
+        # Update value stored in controller (persistent across runs)
+        self.controller.show_tithing = self.tithing_visible.get()
+
+        # Update transaction view to have/not have the tithing tracker
+        # visible.
+        if hasattr(self, "transactions"):
+            for trans in self.transactions:
+                trans.set_tithing_visible(self.tithing_visible.get())
 
 class InputGUIParent:
     """ A parent class for the Add__GUI classes that contains a few
@@ -388,7 +416,7 @@ class AddAccountGUI(InputGUIParent):
 
         # Set the account as the active account and update dropdown
         # options.
-        parent.set_trans_window(account)
+        parent.set_account_window(account)
         parent.update_account_info(account)
 
         # Close the window.
@@ -642,12 +670,14 @@ class TransactionDisplay:
     transaction. 
     """
 
-    def __init__(self, parent, trans, main_gui):
+    def __init__(self, parent, trans, main_gui, show_tithing=True):
         """ Initializer method, sets up the transaction display.
         """
 
-        # Store a reference to the main GUI window
+        # Store a reference to the main GUI window and this window's
+        # transaction
         self.main_gui = main_gui
+        self.trans = trans
 
         # Frame to hold everything in.
         self.wrapper = tk.Frame(parent, borderwidth=3, relief=tk.RIDGE)
@@ -682,6 +712,9 @@ class TransactionDisplay:
                                     variable=self.tithing_var, 
                                     command=lambda: self.tithing_update(trans))
             self.tithing_check.pack(side='right', padx=5, pady=5)
+            self.tithing_check.update_idletasks()
+
+        self.set_tithing_visible(show_tithing)
 
         # Expense vs Income different text color
         if trans.type == TransType.EXPENSE:
@@ -731,6 +764,18 @@ class TransactionDisplay:
         """
 
         trans.tithing_paid = self.tithing_var.get()
+
+    def set_tithing_visible(self, show_tithing):
+        """ Sets the tithing checkbox to either be hidden or visible
+        depending on the value of show_tithing - hidden if False, 
+        visible if True.
+        """
+
+        if self.trans.type == TransType.INCOME:
+            if show_tithing and not self.tithing_check.winfo_viewable():
+                self.tithing_check.pack(side='right', padx=5, pady=5)
+            elif not show_tithing and self.tithing_check.winfo_viewable():
+                self.tithing_check.pack_forget()
 
 class DateInput(ttk.Frame):
     """ A custom class written to allow the user to enter a date. Uses
