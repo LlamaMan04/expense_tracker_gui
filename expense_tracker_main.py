@@ -160,6 +160,8 @@ class Controller:
         filepath for it isn't stored, prompts the user to select one
         and then saves the profile to that file. 
         """
+        if self.active_profile == None:
+            return
 
         if self.active_file_path == None:
             self.save_as_new_profile()
@@ -170,6 +172,9 @@ class Controller:
         """ Prompts the user to enter a filepath, then saves the 
         currently active profile to that file. 
         """
+
+        if self.active_profile == None:
+            return
         
         # Prompt the user for a filepath and append a file extension.
         save_filepath = filedialog.asksaveasfilename()

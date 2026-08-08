@@ -91,6 +91,11 @@ class ExpenseTrackerGUI:
             # with that info.
             self.setup_profile_in_gui(profile)
 
+        # Bind the hotkey listener to listen for keypresses.
+        self.root.bind("<Control-t>", self.handle_keybind)
+        self.root.bind("<Control-a>", self.handle_keybind)
+        self.root.bind("<Control-s>", self.handle_keybind)
+
         # Build the GUI.
         self.root.mainloop()
 
@@ -162,7 +167,7 @@ class ExpenseTrackerGUI:
 
         # Add Transaction button.
         self.add_trans_button = tk.Button(self.account_frame, 
-                                          text="Add Transaction", 
+                                          text="Add Transaction (Ctrl+t)", 
                                           font=('Arial', 12), 
                                           command=lambda: 
                                             self.add_trans(account))
@@ -277,6 +282,33 @@ class ExpenseTrackerGUI:
             for trans in self.transactions:
                 trans.set_tithing_visible(self.tithing_visible.get())
 
+    def handle_keybind(self, event):
+        """ This method is bound to various hotkeys being pressed and
+        will call the appropriate function based on the key pressed. 
+        """
+
+        # Verify that one of the program's windows is selected.
+        if self.root.focus_get() is None:
+            return
+
+        # If any secondary windows are open ignore the keypress.
+        toplevels = [w for w in self.root.winfo_children() 
+                     if isinstance(w, tk.Toplevel)]
+        if toplevels:
+            return
+
+        # Handle ctrl-t add transaction keybind
+        if (event.keysym == 't' and hasattr(self, 'add_trans_button')):
+            self.add_trans_button.invoke()
+
+        # Handle ctrl-a add account keybind
+        if (event.keysym == 'a' and hasattr(self, 'add_account_button')):
+            self.add_account_button.invoke()
+
+        # Handle ctrl-s save keybind
+        if (event.keysym == 's' and hasattr(self, 'add_account_button')):
+            self.controller.save()
+
 class InputGUIParent:
     """ A parent class for the Add__GUI classes that contains a few
     helpful validation functions that each uses. 
@@ -365,6 +397,7 @@ class AddAccountGUI(InputGUIParent):
                                    validate='key', 
                                    validatecommand=(valid_name, '%P'))
         self.name_input.pack(padx=20, pady=10)
+        self.name_input.focus_set()
 
         # Account balance input.
         self.balance_label = tk.Label(self.root, text="Account balance:", 
@@ -380,12 +413,16 @@ class AddAccountGUI(InputGUIParent):
                                        font=('Arial', 10), 
                                        command=self.close_add_account_window)
         self.cancel_button.pack(side='left', padx=10, pady=10, anchor='s')
+        self.root.bind("<Escape>", lambda event: self.cancel_button.invoke())
 
         # Save button.
         self.save_button = tk.Button(self.root, text="Save", font=('Arial', 10),
                                      command=lambda: 
                                         self.save_account_new(profile, parent))
         self.save_button.pack(side='right', padx=10, pady=10, anchor='s')
+
+        # Also bind the enter key to do the same as the save button.
+        self.root.bind("<Return>", lambda event: self.save_button.invoke())
 
     def close_add_account_window(self):
         """ Closes the add account GUI window and returns control to
@@ -519,6 +556,7 @@ class AddTransactionGUI(InputGUIParent):
                                    font=('Arial', 12), validate='key', 
                                    validatecommand=(valid_name, '%P'))
         self.desc_input.pack(padx=0, pady=5)
+        self.desc_input.focus_set()
 
         # Transaction amount input.
         self.amount_frame = tk.Frame(self.root)
@@ -559,12 +597,16 @@ class AddTransactionGUI(InputGUIParent):
                                        font=('Arial', 10), 
                                        command=self.close_trans_window)
         self.cancel_button.pack(side='left', padx=10, pady=10, anchor='s')
+        self.root.bind("<Escape>", lambda event: self.cancel_button.invoke())
 
         # Save button.
         self.save_button = tk.Button(self.root, text="Save", font=('Arial', 10), 
                                      command=lambda: 
                                      self.save_trans_new(account, update_func))
         self.save_button.pack(side='right', padx=10, pady=10, anchor='s')
+
+        # Also bind the enter key to do the same as the save button.
+        self.root.bind("<Return>", lambda event: self.save_button.invoke())
     
     def save_trans_new(self, account, update_func):
         """ Saves the values entered in the add transaction window
